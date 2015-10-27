@@ -301,7 +301,7 @@ void get_usb_cameras (usb_cam (*cameras)[], int* camera_count)
                            184,
                            NULL,
                            "Unable to retrieve usb device for %s", needed_path);
-            return;
+            continue;
         }
 
         /* From here, we can call get_sysattr_value() for each file
