@@ -69,6 +69,7 @@ GST_DEBUG_CATEGORY_STATIC (gst_tis_auto_exposure_debug_category);
 
 #define CLIP(val,l,h) ( (val) < (l) ? (l) : (val) > (h) ? (h) : (val) )
 
+guint ref_val = 128;
 
 /* prototypes */
 
@@ -103,6 +104,7 @@ enum
     PROP_CAMERA,
     PROP_EXPOSURE_MAX,
     PROP_GAIN_MAX,
+    PROP_REF_VAL
 };
 
 /* pad templates */
@@ -188,6 +190,14 @@ static void gst_tis_auto_exposure_class_init (GstTis_Auto_ExposureClass* klass)
                                                           "Gstreamer element that shall be manipulated",
                                                           GST_TYPE_ELEMENT,
                                                           G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
+
+    g_object_class_install_property (gobject_class,
+                                     PROP_REF_VAL,
+                                     g_param_spec_uint ("ref-value",
+                                                       "Ref Value",
+                                                       "reference value for optimal brightness",
+                                                       0, 255, 128,
+                                                       G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
 }
 
 static void gst_tis_auto_exposure_init (GstTis_Auto_Exposure *self)
@@ -227,6 +237,9 @@ void gst_tis_auto_exposure_set_property (GObject* object,
             if (tis_auto_exposure->gain.max == 0.0)
                 tis_auto_exposure->gain = tis_auto_exposure->default_gain_values;
             break;
+        case PROP_REF_VAL:
+            ref_val = g_value_get_uint(value);
+            break;
         default:
             G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
             break;
@@ -256,6 +269,9 @@ void gst_tis_auto_exposure_get_property (GObject* object,
             break;
         case PROP_GAIN_MAX:
             g_value_set_double(value, tis_auto_exposure->gain.max);
+            break;
+        case PROP_REF_VAL:
+            g_value_set_uint(value, ref_val);
             break;
         default:
             G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
